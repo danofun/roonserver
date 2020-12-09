@@ -1,4 +1,4 @@
-FROM debian:9.6
+FROM debian:stable-slim
 MAINTAINER steef@debruijn.ws
 
 RUN apt-get update \
