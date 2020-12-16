@@ -14,18 +14,19 @@ RUN \
  apt-get update && \
  apt-get install -y \
 	--no-install-recommends \
+	ffmpeg \
 	libasound2 \
 	cifs-utils && \
  echo "**** downloading $PACKAGE_FILE to $TMPDIR/$PACKAGE_FILE ****" && \
  curl -# -o "$TMPDIR/$PACKAGE_FILE" "$PACKAGE_URL" && \
  echo -n "**** unpacking ${PACKAGE_FILE} ****" ** \
- cd $TMPDIR && \
+ cd "$TMPDIR" && \
  tar xf "$PACKAGE_FILE" && \
  echo "**** extraction complete ****" && \
  echo -n "**** copying files ****" && \
  mv "$TMPDIR/$PACKAGE_NAME" /opt && \
  echo "**** complete ****" && \
- sh /opt/$PACKAGE_NAME/start.sh
+ sh "/opt/$PACKAGE_NAME/start.sh"
  echo "**** service started ****"
 
 # add local files
