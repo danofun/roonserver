@@ -26,7 +26,7 @@ RUN \
  echo -n "**** copying files ****" && \
  mv "$TMPDIR/$PACKAGE_NAME" /opt && \
  echo "**** complete ****" && \
- sh "/opt/$PACKAGE_NAME/start.sh"
+ sh "/opt/$PACKAGE_NAME/start.sh" && \
  echo "**** service started ****"
 
 # add local files
