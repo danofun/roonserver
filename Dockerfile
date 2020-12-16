@@ -1,17 +1,65 @@
-FROM debian:stable-slim
-MAINTAINER steef@debruijn.ws
+FROM ghcr.io/linuxserver/baseimage-ubuntu:bionic
 
-RUN apt-get update \
-        && apt-get -y upgrade \
-        && apt-get -y install bash curl bzip2 ffmpeg cifs-utils alsa-utils
+# environment settings
+PACKAGE_NAME= \
+ARCH=x64 \
+PACKAGE_URL=http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2 \
+PACKAGE_FILE=${PACKAGE_NAME}_linux${ARCH}.tar.bz2 \
+PACKAGE_NAME_LOWER=`echo "$PACKAGE_NAME" | tr "[A-Z]" "[a-z]"`\
+TMPDIR=`mktemp -d \
+MACHINE_ARCH=`uname -m` \
+SERVICE_FILE=/etc/systemd/system/${PACKAGE_NAME_LOWER}.service
 
-ENV ROON_SERVER_PKG RoonServer_linuxx64.tar.bz2
-ENV ROON_SERVER_URL https://raw.githubusercontent.com/danofun/docker-roonserver/master/${ROON_SERVER_PKG}
-ENV ROON_DATAROOT /data
-ENV ROON_ID_DIR /data
+RUN \
+ rm -Rf $TMPDIR && \
+ echo "**** install runtime packages ****" && \
+ apt-get update && \
+ apt-get install -y \
+	--no-install-recommends \
+	libasound2 \
+	cifs-utils && \
+ echo "**** downloading $PACKAGE_FILE to $TMPDIR/$PACKAGE_FILE ****" && \
+ curl -# -o "$TMPDIR/$PACKAGE_FILE" "$PACKAGE_URL" && \
+ echo -n "**** unpacking ${PACKAGE_FILE} ****" ** \
+ cd $TMPDIR && \
+ tar xf "$PACKAGE_FILE" && \
+ echo "**** extraction complete ****" && \
+ echo -n "**** copying files ****" && \
+ mv "$TMPDIR/$PACKAGE_NAME" /opt && \
+ echo "**** complete ****" && \
 
-VOLUME [ "/app", "/data", "/music", "/backup" ]
+ # set up systemd
+ echo "**** installing $SERVICE_FILE ****" && \
+ # stop in case it's running from an old install
+ systemctl stop $PACKAGE_NAME_LOWER || true && \
+ cat > $SERVICE_FILE << END_SYSTEMD
+[Unit]
+Description=$PACKAGE_NAME
+After=network-online.target
 
-ADD run.sh /
-ENTRYPOINT /run.sh
+[Service]
+Type=simple
+User=root
+Environment=ROON_DATAROOT=/var/roon
+Environment=ROON_ID_DIR=/var/roon
+ExecStart=/opt/$PACKAGE_NAME/start.sh
+Restart=on-abort
 
+[Install]
+WantedBy=multi-user.target
+END_SYSTEMD && \
+
+ echo "**** enabling service ${PACKAGE_NAME_LOWER} ****" && \
+ systemctl enable ${PACKAGE_NAME_LOWER}.service && \
+ echo "**** Service Enabled ****" && \
+
+ echo "**** starting service ${PACKAGE_NAME_LOWER} ****" && \
+ systemctl start ${PACKAGE_NAME_LOWER}.service && \
+ echo "**** service Started ****"
+
+# add local files
+COPY root/ /
+
+# ports and volumes
+EXPOSE 9003/udp 9100-9200/tcp
+VOLUME /var/roon /music /backup
