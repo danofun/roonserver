@@ -30,22 +30,22 @@ RUN \
  echo "**** installing $SERVICE_FILE ****" && \
  # stop in case it's running from an old install
  systemctl stop $PACKAGE_NAME_LOWER || true && \
- cat > $SERVICE_FILE << END_SYSTEMD
-[Unit]
-Description=$PACKAGE_NAME
-After=network-online.target
-
-[Service]
-Type=simple
-User=root
-Environment=ROON_DATAROOT=/var/roon
-Environment=ROON_ID_DIR=/var/roon
-ExecStart=/opt/$PACKAGE_NAME/start.sh
-Restart=on-abort
-
-[Install]
-WantedBy=multi-user.target
-END_SYSTEMD && \
+ echo $' \n\
+[Unit] \n\
+Description=$PACKAGE_NAME \n\
+After=network-online.target \n\
+ \n\
+[Service] \n\
+Type=simple \n\
+User=root \n\
+Environment=ROON_DATAROOT=/var/roon \n\
+Environment=ROON_ID_DIR=/var/roon \n\
+ExecStart=/opt/$PACKAGE_NAME/start.sh \n\
+Restart=on-abort \n\
+ \n\
+[Install] \n\
+WantedBy=multi-user.target \n\
+' >> $SERVICE_FILE && \
 
  echo "**** enabling service ${PACKAGE_NAME_LOWER} ****" && \
  systemctl enable ${PACKAGE_NAME_LOWER}.service && \
