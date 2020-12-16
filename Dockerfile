@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxserver/baseimage-ubuntu:bionic
+FROM debian:stable-slim
 
 # environment settings
 PACKAGE_NAME= \
