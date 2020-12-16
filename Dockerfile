@@ -25,35 +25,8 @@ RUN \
  echo -n "**** copying files ****" && \
  mv "$TMPDIR/$PACKAGE_NAME" /opt && \
  echo "**** complete ****" && \
-
- # set up systemd
- echo "**** installing $SERVICE_FILE ****" && \
- # stop in case it's running from an old install
- systemctl stop $PACKAGE_NAME_LOWER || true && \
- echo $' \n\
-[Unit] \n\
-Description=$PACKAGE_NAME \n\
-After=network-online.target \n\
- \n\
-[Service] \n\
-Type=simple \n\
-User=root \n\
-Environment=ROON_DATAROOT=/var/roon \n\
-Environment=ROON_ID_DIR=/var/roon \n\
-ExecStart=/opt/$PACKAGE_NAME/start.sh \n\
-Restart=on-abort \n\
- \n\
-[Install] \n\
-WantedBy=multi-user.target \n\
-' >> $SERVICE_FILE && \
-
- echo "**** enabling service ${PACKAGE_NAME_LOWER} ****" && \
- systemctl enable ${PACKAGE_NAME_LOWER}.service && \
- echo "**** Service Enabled ****" && \
-
- echo "**** starting service ${PACKAGE_NAME_LOWER} ****" && \
- systemctl start ${PACKAGE_NAME_LOWER}.service && \
- echo "**** service Started ****"
+ sh /opt/$PACKAGE_NAME/start.sh
+ echo "**** service started ****"
 
 # add local files
 COPY root/ /
