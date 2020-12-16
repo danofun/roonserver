@@ -1,13 +1,11 @@
 FROM debian:stable-slim
 
 # environment settings
-PACKAGE_NAME= \
-ARCH=x64 \
+PACKAGE_NAME=RoonServer \
 PACKAGE_URL=http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2 \
-PACKAGE_FILE=${PACKAGE_NAME}_linux${ARCH}.tar.bz2 \
+PACKAGE_FILE=${PACKAGE_NAME}_linuxx64.tar.bz2 \
 PACKAGE_NAME_LOWER=`echo "$PACKAGE_NAME" | tr "[A-Z]" "[a-z]"`\
 TMPDIR=`mktemp -d \
-MACHINE_ARCH=`uname -m` \
 SERVICE_FILE=/etc/systemd/system/${PACKAGE_NAME_LOWER}.service
 
 RUN \
